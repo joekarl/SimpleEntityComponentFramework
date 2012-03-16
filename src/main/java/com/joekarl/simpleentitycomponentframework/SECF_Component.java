@@ -17,6 +17,8 @@ import java.util.Map;
  */
 public abstract class SECF_Component {
 
+    private static long nextId = Long.MIN_VALUE;
+    private final long ID = nextId++;
     private Map<String, Object> _objectParams = new HashMap<String, Object>();
     private Object2FloatOpenHashMap<String> _floatParams = new Object2FloatOpenHashMap();
     private Object2IntOpenHashMap<String> _intParams = new Object2IntOpenHashMap();
@@ -61,5 +63,27 @@ public abstract class SECF_Component {
 
     public void setDoubleParameter(String param, double d) {
         _doubleParams.put(param, d);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SECF_Component other = (SECF_Component) obj;
+        if (this.ID != other.ID) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 29 * hash + (int) (this.ID ^ (this.ID >>> 32));
+        return hash;
     }
 }
