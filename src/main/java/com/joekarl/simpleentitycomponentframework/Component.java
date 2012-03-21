@@ -1,12 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.joekarl.simpleentitycomponentframework;
 
 /**
  *
  * @author karl_ctr_kirch
+ * 
+ * Interface for a component. All components must implement this interface
+ * 
  */
 public interface Component {
     

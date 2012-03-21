@@ -22,6 +22,9 @@ public class EntityManager {
 
     private static EntityManager sharedManager = null;
 
+    /*
+     * shared entity manager
+     */
     public static EntityManager sharedManager() {
         if (sharedManager == null) {
             sharedManager = new EntityManager();
@@ -31,17 +34,34 @@ public class EntityManager {
 
     public EntityManager() {
     }
+    /*
+     * entity map for fast access by id
+     */
     private Long2ObjectOpenHashMap<Entity> entityMap = new Long2ObjectOpenHashMap<Entity>();
+    /*
+     * tag map for fast access by tag
+     */
     private Map<String, List<Entity>> tagMap = new HashMap<String, List<Entity>>();
+    /*
+     * component maps for fast access by component type
+     * stored as EntityTriMap for fast lookup
+     */
     private Map<Class<? extends Component>, List<EntityTriMap>> componentMaps =
             new HashMap<Class<? extends Component>, List<EntityTriMap>>();
 
+    /*
+     * creates an entity and inserts it into the entity map
+     */
     public final Entity createEntity() {
         Entity entity = new Entity(this);
         entityMap.put(entity.getId(), entity);
         return entity;
     }
 
+    /*
+     * query the component map to find entities by component
+     * returns EntityTriMap list 
+     */
     public final List<EntityTriMap> getComponentGroup(Class<? extends Component> componentType) {
         List<EntityTriMap> foundMap = componentMaps.get(componentType);
         if (foundMap == null) {
@@ -50,7 +70,10 @@ public class EntityManager {
         return foundMap;
     }
 
-    public final void removeComponentWithEntity(Component c, Entity e) {
+    /*
+     * removes component from component map for entity
+     */
+    protected final void removeComponentWithEntity(Component c, Entity e) {
         if (componentMaps.containsKey(c.getClass())) {
             List<EntityTriMap> foundMapList = componentMaps.get(c.getClass());
             tempTriMap.setId(e.getId());
@@ -60,9 +83,15 @@ public class EntityManager {
             }
         }
     }
+    /*
+     * shared tempTriMap for fast add and remove lookups
+     */
     private EntityTriMap tempTriMap = new EntityTriMap(-1, null, null);
 
-    public final void addComponentWithEntity(Component c, Entity e,
+    /*
+     * adds component to component map for entity 
+     */
+    protected final void addComponentWithEntity(Component c, Entity e,
             Class<? extends Component> componentType) {
         if (componentMaps.containsKey(componentType)) {
             //check to see if it exists
@@ -80,14 +109,23 @@ public class EntityManager {
         }
     }
 
+    /*
+     * overload for more generic add component 
+     */
     public final void addComponentWithEntity(Component c, Entity e) {
         addComponentWithEntity(c, e, c.getClass());
     }
 
+    /*
+     * find by entity id
+     */
     public final Entity getEntityById(long id) {
         return entityMap.get(id);
     }
 
+    /*
+     * get entities from tagmap with matching tag
+     */
     public final List<Entity> getEntitiesByTag(String tag) {
         List<Entity> entityList = tagMap.get(tag);
         if (entityList == null) {
@@ -96,6 +134,9 @@ public class EntityManager {
         return entityList;
     }
 
+    /*
+     * get first entity from tagmap with matching tag
+     */
     public final Entity getFirstEntityByTag(String tag) {
         List<Entity> entityList = tagMap.get(tag);
         if (entityList == null || entityList.isEmpty()) {
@@ -104,6 +145,9 @@ public class EntityManager {
         return entityList.get(0);
     }
 
+    /*
+     * remove tag from tag map for entity
+     */
     protected final void removeTagFromEntity(Entity e) {
         List<Entity> entityList = getEntitiesByTag(e.getTag());
         Iterator<Entity> iterator = entityList.iterator();
@@ -115,6 +159,9 @@ public class EntityManager {
         }
     }
 
+    /*
+     * add tag to tag map for entity
+     */
     protected final void addTagToEntity(Entity e, String tag) {
         if (tag != null && e.getTag() != null && !tag.equals(e.getTag())) {
             removeTagFromEntity(e);
@@ -128,6 +175,9 @@ public class EntityManager {
         entityList.add(e);
     }
 
+    /*
+     * clean dead entities and call destroy on them
+     */
     public final void cleanDeadEntities() {
         ObjectCollection<Entity> entities = entityMap.values();
         ObjectIterator<Entity> iterator = entities.iterator();
