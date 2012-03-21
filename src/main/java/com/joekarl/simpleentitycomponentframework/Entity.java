@@ -85,7 +85,7 @@ public class Entity {
     }
 
     public final void setTag(String tag) {
-        if (this.tag != null) {
+        if (this.tag != null || tag == null || tag.equals("")) {
             cachedEntityManager.removeTagFromEntity(this);
         }
         this.tag = tag;
@@ -109,5 +109,6 @@ public class Entity {
 
     protected final void destroy() {
         removeAllComponents();
+        setTag(null);
     }
 }

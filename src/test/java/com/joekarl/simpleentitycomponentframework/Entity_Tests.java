@@ -61,6 +61,42 @@ public class Entity_Tests extends TestCase {
         Assert.assertTrue(entitiesWithTag.contains(entity3));
     }
 
+    public void testResetTag() {
+        EntityManager em = new EntityManager();
+        Entity entity = em.createEntity();
+
+        entity.setTag("Tag 1");
+
+        entity.setTag("Tag 2");
+
+        Entity foundEntity = em.getFirstEntityByTag("Tag 2");
+        Entity shouldBeNullEntity = em.getFirstEntityByTag("Tag 1");
+        Assert.assertNull(shouldBeNullEntity);
+        Assert.assertEquals(entity, foundEntity);
+
+        List<Entity> entitiesWithTag = em.getEntitiesByTag("Tag 2");
+        List<Entity> shouldBeEmptyList = em.getEntitiesByTag("Tag 1");
+
+        Assert.assertTrue(entitiesWithTag.contains(entity));
+        Assert.assertTrue(shouldBeEmptyList.isEmpty());
+    }
+
+    public void testRemoveTag() {
+        EntityManager em = new EntityManager();
+        Entity entity = em.createEntity();
+
+        entity.setTag("Tag 1");
+
+        entity.setTag(null);
+
+        Entity shouldBeNullEntity = em.getFirstEntityByTag("Tag 1");
+        Assert.assertNull(shouldBeNullEntity);
+
+        List<Entity> shouldBeEmptyList = em.getEntitiesByTag("Tag 1");
+
+        Assert.assertTrue(shouldBeEmptyList.isEmpty());
+    }
+
     public void testAddComponent() {
         EntityManager em = new EntityManager();
         Entity entity = em.createEntity();
@@ -132,5 +168,36 @@ public class Entity_Tests extends TestCase {
         List<EntityTriMap> componentGroup = em.getComponentGroup(TestType.class);
 
         Assert.assertTrue(componentGroup.contains(new EntityTriMap(entity, tc)));
+    }
+
+    public void testKillEntity() {
+        EntityManager em = new EntityManager();
+        Entity entity = em.createEntity();
+        long id = entity.getId();
+
+        final class TempComponent implements Component {
+        }
+
+        TempComponent tc = new TempComponent();
+
+        entity.addComponent(tc);
+
+        entity.setTag("PLAYER");
+
+        entity.setDead();
+
+        em.cleanDeadEntities();
+
+        Entity foundEntity = em.getEntityById(id);
+
+        Assert.assertNull(foundEntity);
+
+        Assert.assertTrue(entity.isDead());
+
+        Assert.assertNull(entity.getComponent(TempComponent.class));
+
+        Assert.assertTrue(em.getComponentGroup(TempComponent.class).isEmpty());
+
+        Assert.assertNull(em.getFirstEntityByTag("PLAYER"));
     }
 }
