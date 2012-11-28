@@ -4,6 +4,7 @@
  */
 package com.joekarl.simpleentitycomponentframework;
 
+import com.joekarl.simpleentitycomponentframework.EntityManager.EntityCustomizer;
 import com.joekarl.simpleentitycomponentframework.components.Transform2D;
 import java.util.List;
 import junit.framework.Assert;
@@ -38,6 +39,61 @@ public class EntityTest extends TestCase {
         Assert.assertEquals(entity, foundEntity);
     }
 
+    public void testCreateEntityCustomizer() {
+        EntityManager em = new EntityManager();
+        em.setOnCreateCustomizer(new EntityCustomizer(){
+
+            @Override
+            public void customizeEntity(Entity e) {
+                e.addComponent(new Transform2D());
+            }
+        });
+        
+        Entity e = em.createEntity();
+        Assert.assertNotNull(e.getComponent(Transform2D.class));
+    }
+    
+    
+    public void testDestroyEntityCustomizer() {
+        EntityManager em = new EntityManager();
+        class ValueObj<T> {
+            public T value;
+        }
+        final ValueObj<Boolean> wasRun = new ValueObj<Boolean>();
+        wasRun.value = false;
+        em.setOnDestroyCustomizer(new EntityCustomizer(){
+
+            @Override
+            public void customizeEntity(Entity e) {
+                wasRun.value = true;
+            }
+        });
+        
+        Entity e = em.createEntity();
+        
+        e.setDead();
+        em.cleanDeadEntities();
+        Assert.assertTrue(wasRun.value);
+    }
+
+    public void testCreateEntityIds() {
+        EntityManager em = new EntityManager();
+        Entity entity1 = em.createEntity();
+        Assert.assertTrue(entity1 != null);
+
+        Entity foundEntity = em.getEntityById(entity1.getId());
+        Assert.assertEquals(entity1, foundEntity);
+        
+        
+        Entity entity2 = em.createEntity();
+        Assert.assertTrue(entity2 != null);
+
+        foundEntity = em.getEntityById(entity2.getId());
+        Assert.assertEquals(entity2, foundEntity);
+        
+        Assert.assertNotSame(entity1.getId(), entity2.getId());
+    }
+    
     public void testFindByTag() {
         EntityManager em = new EntityManager();
         Entity entity = em.createEntity();
@@ -234,11 +290,4 @@ public class EntityTest extends TestCase {
         Assert.assertNull(em.getFirstEntityByTag("PLAYER"));
     }
     
-    public void testEntityHasTransform() {
-        EntityManager em = new EntityManager();
-        Entity entity = em.createEntity();
-        
-        Assert.assertNotNull(entity.getComponent(Transform2D.class));
-    }
-
 }

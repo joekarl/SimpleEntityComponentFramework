@@ -32,8 +32,9 @@ public class ComponentTest extends TestCase {
     // TODO add test methods here. The name must begin with 'test'. For example:
 
     public void testComponentAccess() {
-        EntityManager em = EntityManager.sharedManager();
+        EntityManager em = new EntityManager();
         Entity e = em.createEntity();
+        e.addComponent(new Transform2D());
         final int expectedVal = 50;
         e.addComponent(new Renderable() {
             @Override

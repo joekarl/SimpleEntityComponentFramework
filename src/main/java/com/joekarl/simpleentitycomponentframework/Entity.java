@@ -1,6 +1,5 @@
 package com.joekarl.simpleentitycomponentframework;
 
-import com.joekarl.simpleentitycomponentframework.components.Transform2D;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import java.util.Collection;
@@ -18,7 +17,7 @@ import java.util.Map;
 public class Entity {
 
     /*
-     * store all used id's just in case (and a really big case I might add)
+     * store all used id's just in case (and a really big case I might add but one thats very unlikely....)
      * that we've overflowed our long bounds and ended up at the bottom again
      */
     private static final LongList takenIds = new LongArrayList();
@@ -31,9 +30,9 @@ public class Entity {
      * static method to grab the next available id
      */
     private static long getNextId() {
-        while (takenIds.contains(_nextId)) {
-            _nextId++;
+        while (takenIds.contains(++_nextId)) {
         }
+        takenIds.add(_nextId);
         return _nextId;
     }
     /*
@@ -46,7 +45,6 @@ public class Entity {
      */
     protected Entity(EntityManager em) {
         cachedEntityManager = em;
-        addComponent(new Transform2D());
     }
     /*
      * whether the object is dead

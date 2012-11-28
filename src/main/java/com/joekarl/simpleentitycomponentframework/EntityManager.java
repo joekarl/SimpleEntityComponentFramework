@@ -18,19 +18,19 @@ import java.util.Map;
  *
  * @author karl_ctr_kirch
  */
-public class EntityManager {
+public final class EntityManager {
 
-    private static EntityManager sharedManager = null;
+    //private static EntityManager sharedManager = null;
 
     /*
      * shared entity manager
      */
-    public static EntityManager sharedManager() {
-        if (sharedManager == null) {
-            sharedManager = new EntityManager();
-        }
-        return sharedManager;
-    }
+//    public static EntityManager sharedManager() {
+//        if (sharedManager == null) {
+//            sharedManager = new EntityManager();
+//        }
+//        return sharedManager;
+//    }
 
     public EntityManager() {
     }
@@ -50,10 +50,35 @@ public class EntityManager {
             new HashMap<Class<? extends Component>, List<EntityTriMap>>();
 
     /*
+     * Class to describe customizing an entity
+     */
+    public static abstract class EntityCustomizer {
+
+        public abstract void customizeEntity(Entity e);
+    }
+    /*
+     * on create or on destroy customizers to be called for each entity created
+     * If not null will not be called on create or destroy
+     */
+    private EntityCustomizer onCreateCustomizer = null;
+    private EntityCustomizer onDestroyCustomizer = null;
+
+    public void setOnCreateCustomizer(EntityCustomizer onCreateCustomizer) {
+        this.onCreateCustomizer = onCreateCustomizer;
+    }
+
+    public void setOnDestroyCustomizer(EntityCustomizer onDestroyCustomizer) {
+        this.onDestroyCustomizer = onDestroyCustomizer;
+    }
+
+    /*
      * creates an entity and inserts it into the entity map
      */
     public final Entity createEntity() {
         Entity entity = new Entity(this);
+        if (onCreateCustomizer != null) {
+            onCreateCustomizer.customizeEntity(entity);
+        }
         entityMap.put(entity.getId(), entity);
         return entity;
     }
@@ -196,6 +221,9 @@ public class EntityManager {
             Entity entity = iterator.next();
             if (entity.isDead()) {
                 entity.destroy();
+                if (onDestroyCustomizer != null) {
+                    onDestroyCustomizer.customizeEntity(entity);
+                }
                 iterator.remove();
             }
         }

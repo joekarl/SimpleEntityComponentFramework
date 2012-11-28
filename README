@@ -1,0 +1,12 @@
+Simple Entity Component Framework
+======================================================================================
+For use in games to get rid of the classic monolithic hierarchy.
+
+Basically an Entity (game object) is now just a bag of components.
+A Component is just an object with a reference back to the entity which owns it.
+
+The EntityManager creates Entities and manages access to groups of Components based on type.
+This makes it easy to only iterate over only the objects that need to be iterated over.
+
+Example:
+when rendering, you only want the objects that have renderable components.
