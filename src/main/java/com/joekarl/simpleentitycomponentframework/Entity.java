@@ -1,5 +1,6 @@
 package com.joekarl.simpleentitycomponentframework;
 
+import com.joekarl.simpleentitycomponentframework.components.Transform2D;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import java.util.Collection;
@@ -10,9 +11,9 @@ import java.util.Map;
 /**
  *
  * @author karl_ctr_kirch
- * 
+ *
  * Base class for an entity, All entities must implement this interface
- * 
+ *
  */
 public class Entity {
 
@@ -45,6 +46,7 @@ public class Entity {
      */
     protected Entity(EntityManager em) {
         cachedEntityManager = em;
+        addComponent(new Transform2D());
     }
     /*
      * whether the object is dead
@@ -57,8 +59,7 @@ public class Entity {
     /*
      * components held owned by the enity
      */
-    private Map<Class<? extends Component>, Component> components =
-            new HashMap<Class<? extends Component>, Component>();
+    private Map<Class<? extends Component>, Component> components = new HashMap<Class<? extends Component>, Component>();
     /*
      * reference to the entity manager that created the entity
      */
@@ -66,9 +67,16 @@ public class Entity {
 
     /*
      * Add component to entity
+     * check and see if the component is an anonymous class 
+     * so it works as expected....
      */
     public final void addComponent(Component component) {
-        addComponent(component, component.getClass());
+        if (component.getClass().isAnonymousClass()) {
+            Class<? extends Component> compClass = (Class<? extends Component>) component.getClass().getSuperclass();
+            addComponent(component, compClass);
+        } else {
+            addComponent(component, component.getClass());
+        }
     }
 
     /*
@@ -109,6 +117,13 @@ public class Entity {
      * remove a component from this entity
      */
     public final void removeComponent(Component component) {
+        component.remove = true;
+    }
+
+    /*
+     * remove a component from this entity
+     */
+    protected final void removeComponentNow(Component component) {
         Collection<Component> componentList = components.values();
         Iterator<Component> iterator = componentList.iterator();
         while (iterator.hasNext()) {

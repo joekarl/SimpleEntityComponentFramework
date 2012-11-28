@@ -4,6 +4,7 @@
  */
 package com.joekarl.simpleentitycomponentframework;
 
+import com.joekarl.simpleentitycomponentframework.components.Transform2D;
 import java.util.List;
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -12,9 +13,9 @@ import junit.framework.TestCase;
  *
  * @author karl_ctr_kirch
  */
-public class Entity_Tests extends TestCase {
+public class EntityTest extends TestCase {
 
-    public Entity_Tests(String testName) {
+    public EntityTest(String testName) {
         super(testName);
     }
 
@@ -101,7 +102,7 @@ public class Entity_Tests extends TestCase {
         EntityManager em = new EntityManager();
         Entity entity = em.createEntity();
 
-        final class TempComponent implements Component {
+        final class TempComponent extends Component {
         }
 
         TempComponent tc = new TempComponent();
@@ -116,12 +117,42 @@ public class Entity_Tests extends TestCase {
 
         Assert.assertTrue(componentGroup.contains(new EntityTriMap(entity, tc)));
     }
+    
+    public void testRemoveComponentNow() {
+        EntityManager em = new EntityManager();
+        Entity entity = em.createEntity();
+
+        final class TempComponent extends Component {
+        }
+
+        TempComponent tc = new TempComponent();
+
+        entity.addComponent(tc);
+
+        Assert.assertEquals(tc, entity.getComponent(TempComponent.class));
+
+        Assert.assertTrue(entity.getComponents().contains(tc));
+
+        List<EntityTriMap> componentGroup = em.getComponentGroup(TempComponent.class);
+
+        Assert.assertTrue(componentGroup.contains(new EntityTriMap(entity, tc)));
+
+        entity.removeComponentNow(tc);
+
+        Assert.assertNull(entity.getComponent(TempComponent.class));
+
+        Assert.assertFalse(entity.getComponents().contains(tc));
+
+        componentGroup = em.getComponentGroup(TempComponent.class);
+
+        Assert.assertFalse(componentGroup.contains(new EntityTriMap(entity, tc)));
+    }
 
     public void testRemoveComponent() {
         EntityManager em = new EntityManager();
         Entity entity = em.createEntity();
 
-        final class TempComponent implements Component {
+        final class TempComponent extends Component {
         }
 
         TempComponent tc = new TempComponent();
@@ -137,6 +168,8 @@ public class Entity_Tests extends TestCase {
         Assert.assertTrue(componentGroup.contains(new EntityTriMap(entity, tc)));
 
         entity.removeComponent(tc);
+        
+        em.cleanRemovedComponents();
 
         Assert.assertNull(entity.getComponent(TempComponent.class));
 
@@ -151,7 +184,7 @@ public class Entity_Tests extends TestCase {
         EntityManager em = new EntityManager();
         Entity entity = em.createEntity();
 
-        abstract class TestType implements Component {
+        abstract class TestType extends Component {
         }
 
         final class TempComponent extends TestType {
@@ -175,7 +208,7 @@ public class Entity_Tests extends TestCase {
         Entity entity = em.createEntity();
         long id = entity.getId();
 
-        final class TempComponent implements Component {
+        final class TempComponent extends Component {
         }
 
         TempComponent tc = new TempComponent();
@@ -200,4 +233,12 @@ public class Entity_Tests extends TestCase {
 
         Assert.assertNull(em.getFirstEntityByTag("PLAYER"));
     }
+    
+    public void testEntityHasTransform() {
+        EntityManager em = new EntityManager();
+        Entity entity = em.createEntity();
+        
+        Assert.assertNotNull(entity.getComponent(Transform2D.class));
+    }
+
 }

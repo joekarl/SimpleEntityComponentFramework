@@ -93,6 +93,7 @@ public class EntityManager {
      */
     protected final void addComponentWithEntity(Component c, Entity e,
             Class<? extends Component> componentType) {
+        c.entity = e;
         if (componentMaps.containsKey(componentType)) {
             //check to see if it exists
             List<EntityTriMap> foundMapList = componentMaps.get(componentType);
@@ -175,6 +176,16 @@ public class EntityManager {
         entityList.add(e);
     }
 
+    public final void cleanRemovedComponents() {
+        for (Map.Entry<Class<? extends Component>, List<EntityTriMap>> entry : componentMaps.entrySet()) {
+            for (EntityTriMap entityTriMap : new ArrayList<EntityTriMap>(entry.getValue())) {
+                if (entityTriMap.getComponent().remove) {
+                    entityTriMap.getEntity().removeComponentNow(entityTriMap.getComponent());
+                }
+            }
+        }
+    }
+
     /*
      * clean dead entities and call destroy on them
      */
@@ -186,7 +197,6 @@ public class EntityManager {
             if (entity.isDead()) {
                 entity.destroy();
                 iterator.remove();
-
             }
         }
     }
